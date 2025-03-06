@@ -1,7 +1,8 @@
 import streamlit as st
-from snowflake.cortex import Complete
+from snowflake.cortex import complete
 
-st.title('Chat with models in Snowflake Cortex', anchor=False)
+st.set_page_config(page_title="Chat with models in Snowflake Cortex")
+st.title("Chat with models in Snowflake Cortex", anchor=False)
 
 # Instructions appended to every chat, and always used 
 instructions = "Be concise. Do not hallucinate"
@@ -44,7 +45,12 @@ if prompt:
     
     with st.chat_message("assistant"):  
         context = ",".join(f"role:{message['role']} content:{message['content']}" for message in st.session_state.messages)
-        response = Complete(model, f"Instructions:{instructions}, Context:{context}, Prompt:{prompt}")
+        session = st.connection("snowflake").session()
+        response = complete(
+            model,
+            f"Instructions:{instructions}, Context:{context}, Prompt:{prompt}",
+            session=session,
+        )
         st.markdown(response)
     
         st.session_state.messages.append({
